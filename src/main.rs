@@ -3,6 +3,7 @@ use digest::generic_array::GenericArray;
 use digest::Digest;
 use hex::ToHex;
 use kdam::{tqdm, BarExt, Column, RichProgress};
+use std::fs::metadata;
 use std::fs::{File, OpenOptions};
 use std::io::Read;
 use std::path::{Path, PathBuf};
@@ -12,7 +13,6 @@ use structopt::StructOpt;
 const BENCH_COUNT: usize = 128;
 const BUFFER_LENGTH: usize = 4096;
 const OUTPUT_LENGTH: usize = 32;
-const FILE_SIZE: usize = 16 * 1024 * 1024;
 
 pub struct ChunkedFileReader<const BUFFER_LENGTH: usize> {
     buffer: [u8; BUFFER_LENGTH],
@@ -101,6 +101,7 @@ impl Blake2bHasher {
 }
 
 fn bench<HasherFactory, AnyPath>(
+    file_size: usize,
     mut progress_bar: RichProgress,
     hasher_factory: HasherFactory,
     test_file_path: AnyPath,
@@ -126,16 +127,16 @@ where
 
     let seconds_per_operation = instant.elapsed().as_secs_f64();
     let bytes_per_operation =
-        (FILE_SIZE * BENCH_COUNT) as f64 / seconds_per_operation;
+        (file_size * BENCH_COUNT) as f64 / seconds_per_operation;
     let result = output.encode_hex();
 
     Ok((result, bytes_per_operation))
 }
 
-fn get_progress_bar(test_name: &str) -> RichProgress {
+fn get_progress_bar(file_size: usize, test_name: &str) -> RichProgress {
     let mut pb = RichProgress::new(
         tqdm!(
-            total = BENCH_COUNT * FILE_SIZE,
+            total = BENCH_COUNT * file_size,
             unit_scale = true,
             unit_divisor = 1024,
             unit = "B"
@@ -168,6 +169,7 @@ fn get_progress_bar(test_name: &str) -> RichProgress {
 
 fn bench_with_progress_bar<HasherFactory, AnyPath>(
     title: &str,
+    file_size: usize,
     hasher_factory: HasherFactory,
     test_file_path: AnyPath,
 ) -> anyhow::Result<()>
@@ -175,8 +177,9 @@ where
     HasherFactory: Fn() -> Blake2bHasher,
     AnyPath: AsRef<Path>,
 {
-    let pb = get_progress_bar(title);
-    let (output, throughput) = bench(pb, hasher_factory, test_file_path)?;
+    let pb = get_progress_bar(file_size, title);
+    let (output, throughput) =
+        bench(file_size, pb, hasher_factory, test_file_path)?;
 
     println!("\n** Result     => {}", output);
     println!(
@@ -197,19 +200,24 @@ struct RunOptions {
 
 fn main() -> anyhow::Result<()> {
     let opt = RunOptions::from_args();
+    let file_metadata = metadata(&opt.filepath)?;
+    let file_size = file_metadata.len() as usize;
 
     bench_with_progress_bar(
         "Blake2b256 - RustCrypto",
+        file_size,
         Blake2bHasher::new_rust_crypto,
         &opt.filepath,
     )?;
     bench_with_progress_bar(
         "Blake2b256 - RFC",
+        file_size,
         Blake2bHasher::new_rfc,
         &opt.filepath,
     )?;
     bench_with_progress_bar(
         "Blake2b256 - SIMD",
+        file_size,
         Blake2bHasher::new_simd,
         &opt.filepath,
     )?;
