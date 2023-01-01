@@ -1,0 +1,14 @@
+[package]
+name = "blake2b256-bench"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.68"
+blake2 = { version = "0.10.6", default-features = false }
+blake2-rfc = { version = "0.2.18", default-features = false }
+blake2b_simd = { version = "1.0.0", default-features = false }
+digest = "0.10.6"
+hex = "0.4.3"
+kdam = { version = "0.3.0", features = ["spinner"] }
+structopt = { version = "0.3.26", features = ["color"] }
