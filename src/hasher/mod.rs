@@ -48,18 +48,11 @@ pub struct FileHasher<const BUFFER_LENGTH: usize> {
 }
 
 impl<const BUFFER_LENGTH: usize> FileHasher<BUFFER_LENGTH> {
-    pub fn new<AnyPath: AsRef<Path>>(
-        path: AnyPath,
-        hasher: Blake2bHasher,
-    ) -> Result<Self> {
+    pub fn new<AnyPath: AsRef<Path>>(path: AnyPath, hasher: Blake2bHasher) -> Result<Self> {
         let buffer = [0; BUFFER_LENGTH];
         let file = OpenOptions::new().read(true).write(false).open(path)?;
 
-        Ok(Self {
-            file,
-            hasher,
-            buffer,
-        })
+        Ok(Self { file, hasher, buffer })
     }
 
     pub fn update_hash_buffered(&mut self) -> Result<usize> {
@@ -71,8 +64,7 @@ impl<const BUFFER_LENGTH: usize> FileHasher<BUFFER_LENGTH> {
                 break;
             }
 
-            self.hasher
-                .update_with_slice(&buffer_reference[..read_length]);
+            self.hasher.update_with_slice(&buffer_reference[..read_length]);
             bytes_read += read_length;
         }
 

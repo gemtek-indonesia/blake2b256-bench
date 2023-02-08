@@ -22,7 +22,6 @@ impl SlicedHashUpdate for RustCrypto {
     }
 
     fn finalize_into(self, output: &mut [u8]) {
-        self.inner
-            .finalize_into(GenericArray::from_mut_slice(output));
+        self.inner.finalize_into(GenericArray::from_mut_slice(output));
     }
 }
