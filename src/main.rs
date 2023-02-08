@@ -1,3 +1,7 @@
+#[cfg(feature = "tlsmalloc")]
+#[global_allocator]
+static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+
 use digest::consts::U32;
 use digest::generic_array::GenericArray;
 use digest::Digest;

@@ -1,8 +1,12 @@
 [package]
 name = "blake2b256-bench"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license-file = "LICENSE"
+
+[features]
+default = []
+tlsmalloc = ["mimalloc"]
 
 [dependencies]
 anyhow = "1.0.68"
@@ -12,4 +16,8 @@ blake2b_simd = { version = "1.0.0", default-features = false }
 digest = "0.10.6"
 hex = "0.4.3"
 kdam = { version = "0.3.0", features = ["spinner"] }
+mimalloc = { version = "0.1.34", optional = true, default-features = false, features = [
+    "override",
+    "local_dynamic_tls",
+] }
 structopt = { version = "0.3.26", features = ["color"] }
