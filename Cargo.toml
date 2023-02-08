@@ -14,6 +14,7 @@ blake2 = { version = "0.10.6", default-features = false }
 blake2-rfc = { version = "0.2.18", default-features = false }
 blake2b_simd = { version = "1.0.0", default-features = false }
 digest = "0.10.6"
+enum_dispatch = "0.3.11"
 hex = "0.4.3"
 kdam = { version = "0.3.0", features = ["spinner"] }
 mimalloc = { version = "0.1.34", optional = true, default-features = false, features = [
