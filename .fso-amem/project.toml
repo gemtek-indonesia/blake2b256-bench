@@ -1,0 +1,6 @@
+[project]
+name = "gtid-blake2b256-bench"
+slug = "gtid-blake2b256-bench"
+
+[amem]
+server = "https://amem.flusci.org"
